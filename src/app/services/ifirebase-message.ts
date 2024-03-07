@@ -8,7 +8,10 @@ import {
   MessagePayload,
   Unsubscribe,
 } from 'firebase/messaging';
-import { onBackgroundMessage } from 'firebase/messaging/sw';
+import {
+  getMessaging as getMessagingSw,
+  Messaging as MessagingSw,
+  onBackgroundMessage } from 'firebase/messaging/sw';
 
 export interface IFirebaseMessage {
   initialize(): void;
@@ -84,8 +87,9 @@ export class FirebaseMessage implements IFirebaseMessage, OnDestroy {
       this.firebaseMessaging,
       (payload: MessagePayload) => {}
     );
+    this.messagingSw = getMessagingSw(this.firebaseApp);
     this.messageBackSub = onBackgroundMessage(
-      this.firebaseMessaging,
+      this.messagingSw,
       (payload: MessagePayload) => {
         console.log(
           '[firebase-messaging-sw.js] Received background message ',
@@ -121,6 +125,7 @@ export class FirebaseMessage implements IFirebaseMessage, OnDestroy {
   messageBackSub?: Unsubscribe;
   firebaseApp!: FirebaseApp;
   firebaseMessaging!: Messaging;
+  messagingSw!: MessagingSw;
   firebaseToken!: string;
 
   onTokenReceive: EventEmitter<string> = new EventEmitter();
